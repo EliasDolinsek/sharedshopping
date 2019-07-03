@@ -1,10 +1,15 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:sharedshopping/core/user.dart';
+import 'package:sharedshopping/pages/sign_in_page.dart';
 import 'package:sharedshopping/widgets/raised_textfield.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:image_picker/image_picker.dart';
+import '../core/data_tool.dart' as dataTool;
+
+const double avatarRadius = 80;
 
 class ProfileSettings extends StatelessWidget {
   const ProfileSettings();
@@ -37,7 +42,11 @@ class ProfileSettings extends StatelessWidget {
               children: <Widget>[
                 MaterialButton(
                   child: Text("SIGN OUT"),
-                  onPressed: () {},
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (context) => _buildSingOutDialog(context));
+                  },
                 ),
                 MaterialButton(
                   child: Text("HELP"),
@@ -55,71 +64,147 @@ class ProfileSettings extends StatelessWidget {
     );
   }
 
+  Widget _buildSingOutDialog(BuildContext context) {
+    return AlertDialog(
+      title: Text("Sign out"),
+      content: Text("Sign out of your current profile"),
+      actions: <Widget>[
+        MaterialButton(
+          child: Text("CANCEL"),
+          onPressed: () => Navigator.pop(context),
+        ),
+        MaterialButton(
+          child: Text("SIGN OUT"),
+          onPressed: () {
+            FirebaseAuth.instance.signOut().whenComplete(() {
+              Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => SignInPage()));
+            }).catchError((e) {
+              Scaffold.of(context)
+                  .showSnackBar(SnackBar(content: Text("Failed to sign out")));
+            });
+          },
+        )
+      ],
+    );
+  }
+
   Widget _buildContent(FirebaseUser firebaseUser) {
     return Column(
       children: <Widget>[
         SizedBox(height: 48.0),
         StreamBuilder(
-          stream: Firestore.instance.collection("users").document(firebaseUser.uid).snapshots(),
-          builder: (context, snapshot){
-            if(snapshot.hasData && !snapshot.hasError){
+          stream: Firestore.instance
+              .collection("users")
+              .document(firebaseUser.uid)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData && !snapshot.hasError) {
               final user = User.fromMap(snapshot.data.data);
-              return _buildProfilePicture(user.avatarURL);
+              return AvatarSettings(firebaseUser, user.avatarURL);
             } else {
-              return _buildAvatarLoadingPlaceholder();
+              return AvatarPlaceholder("LOADING...");
             }
           },
         ),
         SizedBox(
-          height: 48.0,
+          height: 24.0,
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: UsernameSettings(firebaseUser.uid),
         ),
-        SizedBox(height: 16.0),
-        Text(
-          firebaseUser.email ?? "unknwon email",
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        ),
+      ],
+    );
+  }
+}
+
+class AvatarSettings extends StatefulWidget {
+  final FirebaseUser firebaseUser;
+  final String avatarURL;
+
+  const AvatarSettings(this.firebaseUser, this.avatarURL);
+
+  @override
+  _AvatarSettingsState createState() => _AvatarSettingsState();
+}
+
+class _AvatarSettingsState extends State<AvatarSettings> {
+  AvatarSelectionState avatarSelectionState;
+
+  @override
+  void initState() {
+    super.initState();
+    avatarSelectionState = AvatarSelectionState.normal;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        _buildAvatar(),
+        MaterialButton(
+          child: Text(
+            _getAvatarActionText(),
+            style: TextStyle(color: Colors.black),
+          ),
+          onPressed: () => _getAvatarAction(),
+        )
       ],
     );
   }
 
-  Widget _buildProfilePicture(String avatarURL) {
+  String _getAvatarActionText() =>
+      avatarSelectionState == AvatarSelectionState.normal
+          ? "CHANGE"
+          : "UPLOADING...";
+
+  void _getAvatarAction() {
+    if (avatarSelectionState == AvatarSelectionState.normal) {
+      dataTool.pickAvatar(widget.firebaseUser.uid, () {
+        setState(() {
+          avatarSelectionState = AvatarSelectionState.uploading;
+        });
+      }, () {
+        setState(() {
+          avatarSelectionState = AvatarSelectionState.normal;
+        });
+      });
+    } else {
+      return null;
+    }
+  }
+
+  Widget _buildAvatar() {
     return Material(
       borderRadius: BorderRadius.circular(90),
       elevation: 10,
       child: CachedNetworkImage(
-        imageUrl:
-            avatarURL,
+        imageUrl: widget.avatarURL ?? "",
         imageBuilder: (context, provider) => CircleAvatar(
-          backgroundImage: provider,
-          maxRadius: 80,
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 20.0),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: FlatButton.icon(
-                onPressed: () {
-                  ImagePicker.pickVideo(source: ImageSource.gallery);
-                },
-                icon: Icon(
-                  Icons.file_upload,
-                  color: Colors.white,
-                ),
-                label: Text("CHANGE", style: TextStyle(color: Colors.white),),
-              ),
+              backgroundImage: provider,
+              maxRadius: avatarRadius,
             ),
-          ),
-        ),
-        placeholder: (context, string) => _buildAvatarLoadingPlaceholder(),
+        placeholder: (context, string) => AvatarPlaceholder("LOADING..."),
+        errorWidget: (context, string, a) => AvatarPlaceholder("NO AVATAR"),
       ),
     );
   }
+}
 
-  Widget _buildAvatarLoadingPlaceholder(){
-    return Icon(Icons.person);
+enum AvatarSelectionState { normal, uploading }
+
+class AvatarPlaceholder extends StatelessWidget {
+  final String text;
+
+  const AvatarPlaceholder(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return CircleAvatar(
+      child: Text(text),
+      radius: avatarRadius,
+    );
   }
 }
 
@@ -133,6 +218,7 @@ class UsernameSettings extends StatefulWidget {
 }
 
 class _UsernameSettingsState extends State<UsernameSettings> {
+
   String _username;
   DocumentReference userDocument;
 
@@ -163,7 +249,7 @@ class _UsernameSettingsState extends State<UsernameSettings> {
                 "UPDATE",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              onTap: () => _updateUsername(_username, userDocument),
+              onTap: _setUsername,
             ),
           );
         } else {
@@ -173,8 +259,8 @@ class _UsernameSettingsState extends State<UsernameSettings> {
     );
   }
 
-  void _updateUsername(String value, DocumentReference userDocument) {
-    userDocument.updateData({"name": value}).whenComplete(() {
+  void _setUsername() {
+    dataTool.setUsername(_username, widget.firebaseUserID).whenComplete(() {
       Scaffold.of(context).showSnackBar(
           SnackBar(content: Text("Updated username successfully")));
     }).catchError((e) {

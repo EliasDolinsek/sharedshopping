@@ -36,20 +36,26 @@ class _ShoppingListsOverviewState extends State<ShoppingListsOverview> {
                   stream: _shoppingListsStream(snapshot.data.uid),
                   builder: (context, snapshot) {
                     if (snapshot.hasError || !snapshot.hasData) {
-                      return Center(
-                        child: CircularProgressIndicator(),
-                      );
+                      return _buildLoadingIndicator();
                     } else {
                       return _buildShoppingListsList(snapshot.data);
                     }
                   },
                 );
               } else {
-                return Center(child: CircularProgressIndicator());
+                return _buildLoadingIndicator();
               }
             },
           )
         ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingIndicator(){
+    return Expanded(
+      child: Center(
+        child: CircularProgressIndicator(),
       ),
     );
   }

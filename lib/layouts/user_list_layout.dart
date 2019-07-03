@@ -13,8 +13,12 @@ class UsersList extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Row(
-        children:
-            userIDs.map((userID) => _buildUserAvatar(context, userID)).toList(),
+        children: userIDs
+            .map((userID) => Padding(
+                  padding: EdgeInsets.only(left: 8.0),
+                  child: _buildUserAvatar(context, userID),
+                ))
+            .toList(),
       ),
     );
   }
@@ -24,7 +28,7 @@ class UsersList extends StatelessWidget {
       stream:
           Firestore.instance.collection("users").document(userID).snapshots(),
       builder: (context, snapshot) {
-        if(!snapshot.hasError && snapshot.hasData){
+        if (!snapshot.hasError && snapshot.hasData) {
           var user = User.fromMap(snapshot.data.data);
 
           return CachedNetworkImage(
@@ -40,7 +44,7 @@ class UsersList extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatarLoadingPlaceholder(String userName){
+  Widget _buildAvatarLoadingPlaceholder(String userName) {
     return CircleAvatar(child: Text(userName.substring(0, 1)));
   }
 }

@@ -45,5 +45,17 @@
 	<string>Profile image selection</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Profile image selection</string>
+	<key>CFBundleURLTypes</key>
+    <array>
+    	<dict>
+    		<key>CFBundleTypeRole</key>
+    		<string>Editor</string>
+    		<key>CFBundleURLSchemes</key>
+    		<array>
+    			<!-- Copied from GoogleService-Info.plist key REVERSED_CLIENT_ID -->
+    			<string>com.googleusercontent.apps.590925627438-htear6g3b0fr7a9gt5dpk6386u2anjnq</string>
+    		</array>
+    	</dict>
+    </array>
 </dict>
 </plist>

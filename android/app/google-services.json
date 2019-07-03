@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "590925627438",
+    "firebase_url": "https://sharedshopping-de574.firebaseio.com",
+    "project_id": "sharedshopping-de574",
+    "storage_bucket": "sharedshopping-de574.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:590925627438:android:265518d1e51c17d2",
+        "android_client_info": {
+          "package_name": "com.dolinsek.elias.sharedshopping"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "590925627438-8kuov9umgps2689s30hvaj0osr1bhsvm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6RW-dGotKH1180LujrDWd3mhMbW2uqvM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "590925627438-8kuov9umgps2689s30hvaj0osr1bhsvm.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "590925627438-htear6g3b0fr7a9gt5dpk6386u2anjnq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.dolinsek.elias.sharedshopping"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

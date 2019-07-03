@@ -1,8 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sharedshopping/layouts/overview_layout.dart';
 import 'package:sharedshopping/layouts/profile_settings_layout.dart';
 
+import 'sign_in_page.dart';
+
 class MainPage extends StatefulWidget {
+
   @override
   _MainPageState createState() => _MainPageState();
 }
@@ -14,6 +18,18 @@ class _MainPageState extends State<MainPage> {
     ShoppingListsOverview(),
     ProfileSettings(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _startSignInPageIfNotSignedIn();
+  }
+
+  void _startSignInPageIfNotSignedIn() async {
+    if(await FirebaseAuth.instance.currentUser() == null){
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => SignInPage()));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
