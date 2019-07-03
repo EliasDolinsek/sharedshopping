@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>590925627438-htear6g3b0fr7a9gt5dpk6386u2anjnq.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.590925627438-htear6g3b0fr7a9gt5dpk6386u2anjnq</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBW55jjtaZtL9K7qOz9d-niUm1oWlFywfI</string>
+	<key>GCM_SENDER_ID</key>
+	<string>590925627438</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.dolinsek.elias.sharedshopping</string>
+	<key>PROJECT_ID</key>
+	<string>sharedshopping-de574</string>
+	<key>STORAGE_BUCKET</key>
+	<string>sharedshopping-de574.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:590925627438:ios:265518d1e51c17d2</string>
+	<key>DATABASE_URL</key>
+	<string>https://sharedshopping-de574.firebaseio.com</string>
+</dict>
+</plist>
