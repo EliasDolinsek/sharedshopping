@@ -221,13 +221,9 @@ class _UsernameSettingsState extends State<UsernameSettings> {
             text: _username,
             maxLength: 20,
             onChange: (value) => _username = value,
-            suffix: InkWell(
-              borderRadius: BorderRadius.circular(45),
-              child: Text(
-                "UPDATE",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              onTap: () => _setUsername(context),
+            suffixIcon: IconButton(
+              icon: Icon(Icons.check),
+              onPressed: () => _setUsername(context),
             ),
           );
         } else {

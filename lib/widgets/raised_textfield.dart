@@ -4,14 +4,14 @@ class RaisedTextField extends StatelessWidget {
   final Function(String value) onChange;
   final String hintText;
   final String text;
-  final Widget suffix;
+  final Widget suffixIcon;
   final int maxLength;
 
   const RaisedTextField(
       {this.onChange(String value),
       this.hintText,
       this.text = "",
-      this.suffix,
+      this.suffixIcon,
       this.maxLength});
 
   @override
@@ -21,23 +21,18 @@ class RaisedTextField extends StatelessWidget {
       elevation: 3,
       child: Padding(
         padding: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Expanded(
-              child: TextField(
-                maxLength: maxLength ?? null,
-                controller: TextEditingController(text: text),
-                decoration: InputDecoration(
-                  hintText: hintText,
-                  counter: SizedBox(height: 0,),
-                  border: InputBorder.none,
-                ),
-                onChanged: onChange,
+        child: TextField(
+          maxLength: maxLength ?? null,
+          controller: TextEditingController(text: text)
+            ..selection = TextSelection.collapsed(offset: text.length),
+          decoration: InputDecoration(
+              hintText: hintText,
+              counter: SizedBox(
+                height: 0,
               ),
-            ),
-            Padding(child: suffix, padding: EdgeInsets.only(bottom: 6),) ?? Container(width: 0, height: 0)
-          ],
+              border: InputBorder.none,
+              suffixIcon: suffixIcon),
+          onChanged: onChange,
         ),
       ),
     );

@@ -36,6 +36,7 @@ class StartPage extends StatelessWidget {
                 .collection("shoppingLists")
                 .where("userIDs", arrayContains: firebaseUserID),
             userDataReference: Firestore.instance.collection("users").document(firebaseUserID),
+            firebaseUserID: firebaseUserID,
           );
         } else if (user == null) {
           return SignInPage();

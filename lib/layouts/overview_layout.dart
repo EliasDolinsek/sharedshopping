@@ -6,6 +6,7 @@ import 'package:sharedshopping/core/shopping_list.dart';
 import 'package:sharedshopping/layouts/user_list_layout.dart';
 import 'package:sharedshopping/pages/shopping_list_page.dart';
 import 'package:sharedshopping/widgets/raised_textfield.dart';
+import '../core/data_tool.dart' as dataTool;
 
 class ShoppingListsOverview extends StatefulWidget {
   const ShoppingListsOverview();
@@ -15,32 +16,47 @@ class ShoppingListsOverview extends StatefulWidget {
 }
 
 class _ShoppingListsOverviewState extends State<ShoppingListsOverview> {
+
   String _search = "";
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: <Widget>[
-          RaisedTextField(
-            onChange: (value) => setState(() => _search = value),
-            hintText: "Search",
-          ),
-          SizedBox(
-            height: 16.0,
-          ),
-          StreamBuilder<QuerySnapshot>(
-            stream: DataProvider.of(context).shoppingListsStream,
-            builder: (context, snapshot) {
-              if (snapshot.hasError || !snapshot.hasData) {
-                return _buildLoadingIndicator();
-              } else {
-                return _buildShoppingListsList(snapshot.data);
-              }
-            },
-          )
-        ],
+    return Scaffold(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: <Widget>[
+            RaisedTextField(
+              onChange: (value) => setState(() => _search = value),
+              hintText: "Search",
+            ),
+            SizedBox(
+              height: 16.0,
+            ),
+            StreamBuilder<QuerySnapshot>(
+              stream: DataProvider.of(context).shoppingListsStream,
+              builder: (context, snapshot) {
+                if (snapshot.hasError || !snapshot.hasData) {
+                  return _buildLoadingIndicator();
+                } else {
+                  return _buildShoppingListsList(snapshot.data);
+                }
+              },
+            )
+          ],
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FloatingActionButton.extended(
+        label: FlatButton.icon(
+          onPressed: () {
+            final firebaseUserID = DataProvider.of(context).firebaseUserID;
+            dataTool.createShoppingList(
+                ShoppingList(adminID: firebaseUserID, userIDs: [firebaseUserID], title: "New Shopping List"));
+          },
+          icon: Icon(Icons.add),
+          label: Text("CREATE"),
+        ),
       ),
     );
   }
@@ -64,17 +80,22 @@ class _ShoppingListsOverviewState extends State<ShoppingListsOverview> {
         ),
       );
     } else {
-      return ListView.separated(
-        shrinkWrap: true,
-        itemCount: snapshot.documents.length,
-        itemBuilder: (context, index){
-          final document = snapshot.documents.elementAt(index);
-          return _buildShoppingListCard(
-              ShoppingList.fromMap(document.data, document.documentID));
-        },
-        separatorBuilder: (context, index) => SizedBox(
-              height: 8.0,
-            ),
+      return Expanded(
+        child: ListView.separated(
+          shrinkWrap: true,
+          itemCount: snapshot.documents.length,
+          itemBuilder: (context, index){
+            final document = snapshot.documents.elementAt(index);
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: 2, vertical: 8),
+              child: _buildShoppingListCard(
+                  ShoppingList.fromMap(document.data, document.documentID)),
+            );
+          },
+          separatorBuilder: (context, index) => SizedBox(
+            height: 8.0,
+          ),
+        ),
       );
     }
   }
@@ -83,7 +104,7 @@ class _ShoppingListsOverviewState extends State<ShoppingListsOverview> {
     return InkWell(
       onTap: () {
         Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => ShoppingListPage(shoppingList)));
+            builder: (context) => ShoppingListPage(shoppingList.id)));
       },
       child: Material(
         elevation: 3,

@@ -4,7 +4,7 @@ class ShoppingList {
   String title, adminID, id;
   bool done;
 
-  ShoppingList({this.articlesIDs, this.title, this.userIDs, this.done, this.adminID, this.id});
+  ShoppingList({this.articlesIDs = const [], this.title = "", this.userIDs = const [], this.done = false, this.adminID = "", this.id});
 
   factory ShoppingList.fromMap(Map<dynamic, dynamic> map, String id) {
     if (map == null) return ShoppingList();

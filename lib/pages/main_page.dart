@@ -1,18 +1,17 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sharedshopping/core/dataProvider.dart';
+import 'package:sharedshopping/core/shopping_list.dart';
 import 'package:sharedshopping/layouts/overview_layout.dart';
 import 'package:sharedshopping/layouts/profile_settings_layout.dart';
-
-import 'sign_in_page.dart';
+import '../core/data_tool.dart' as dataTool;
 
 class MainPage extends StatefulWidget {
-
   @override
   _MainPageState createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
-
   int _selectedIndex = 0;
   static const List<Widget> _contents = [
     ShoppingListsOverview(),
