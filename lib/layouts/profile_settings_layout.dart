@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:sharedshopping/core/dataProvider.dart';
 import 'package:sharedshopping/core/user.dart';
 import 'package:sharedshopping/pages/sign_in_page.dart';
 import 'package:sharedshopping/widgets/raised_textfield.dart';
@@ -19,21 +20,7 @@ class ProfileSettings extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        FutureBuilder(
-          future: FirebaseAuth.instance.currentUser(),
-          builder: (context, user) {
-            if (user.hasData && !user.hasError) {
-              return _buildContent(user.data);
-            } else {
-              return Expanded(
-                flex: 9,
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              );
-            }
-          },
-        ),
+        _buildContent(context),
         Expanded(
           child: Align(
             alignment: Alignment.bottomCenter,
@@ -89,19 +76,17 @@ class ProfileSettings extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(FirebaseUser firebaseUser) {
+  Widget _buildContent(BuildContext context) {
+    final dataProvider = DataProvider.of(context);
     return Column(
       children: <Widget>[
         SizedBox(height: 48.0),
         StreamBuilder(
-          stream: Firestore.instance
-              .collection("users")
-              .document(firebaseUser.uid)
-              .snapshots(),
+          stream: dataProvider.userDataStream,
           builder: (context, snapshot) {
             if (snapshot.hasData && !snapshot.hasError) {
               final user = User.fromMap(snapshot.data.data);
-              return AvatarSettings(firebaseUser, user.avatarURL);
+              return AvatarSettings(dataProvider.firebaseUserID, user.avatarURL);
             } else {
               return AvatarPlaceholder("LOADING...");
             }
@@ -112,7 +97,7 @@ class ProfileSettings extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: UsernameSettings(firebaseUser.uid),
+          child: UsernameSettings(dataProvider.firebaseUserID),
         ),
       ],
     );
@@ -120,10 +105,10 @@ class ProfileSettings extends StatelessWidget {
 }
 
 class AvatarSettings extends StatefulWidget {
-  final FirebaseUser firebaseUser;
-  final String avatarURL;
 
-  const AvatarSettings(this.firebaseUser, this.avatarURL);
+  final String avatarURL, firebaseUserID;
+
+  const AvatarSettings(this.firebaseUserID, this.avatarURL);
 
   @override
   _AvatarSettingsState createState() => _AvatarSettingsState();
@@ -148,7 +133,7 @@ class _AvatarSettingsState extends State<AvatarSettings> {
             _getAvatarActionText(),
             style: TextStyle(color: Colors.black),
           ),
-          onPressed: () => _getAvatarAction(),
+          onPressed: () => _getAvatarAction(context),
         )
       ],
     );
@@ -159,9 +144,9 @@ class _AvatarSettingsState extends State<AvatarSettings> {
           ? "CHANGE"
           : "UPLOADING...";
 
-  void _getAvatarAction() {
+  void _getAvatarAction(BuildContext context) {
     if (avatarSelectionState == AvatarSelectionState.normal) {
-      dataTool.pickAvatar(widget.firebaseUser.uid, () {
+      dataTool.pickAvatar(DataProvider.of(context), () {
         setState(() {
           avatarSelectionState = AvatarSelectionState.uploading;
         });
@@ -209,6 +194,7 @@ class AvatarPlaceholder extends StatelessWidget {
 }
 
 class UsernameSettings extends StatefulWidget {
+
   final String firebaseUserID;
 
   UsernameSettings(this.firebaseUserID);
@@ -220,19 +206,11 @@ class UsernameSettings extends StatefulWidget {
 class _UsernameSettingsState extends State<UsernameSettings> {
 
   String _username;
-  DocumentReference userDocument;
-
-  @override
-  void initState() {
-    super.initState();
-    userDocument =
-        Firestore.instance.collection("users").document(widget.firebaseUserID);
-  }
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: userDocument.snapshots(),
+      stream: DataProvider.of(context).userDataStream,
       builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
         if (snapshot.hasData && !snapshot.hasError) {
           var user = User.fromMap(snapshot.data.data);
@@ -249,7 +227,7 @@ class _UsernameSettingsState extends State<UsernameSettings> {
                 "UPDATE",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              onTap: _setUsername,
+              onTap: () => _setUsername(context),
             ),
           );
         } else {
@@ -259,8 +237,8 @@ class _UsernameSettingsState extends State<UsernameSettings> {
     );
   }
 
-  void _setUsername() {
-    dataTool.setUsername(_username, widget.firebaseUserID).whenComplete(() {
+  void _setUsername(BuildContext context) {
+    dataTool.setUsername(_username, context).whenComplete(() {
       Scaffold.of(context).showSnackBar(
           SnackBar(content: Text("Updated username successfully")));
     }).catchError((e) {

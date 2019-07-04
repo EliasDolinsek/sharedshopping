@@ -20,18 +20,6 @@ class _MainPageState extends State<MainPage> {
   ];
 
   @override
-  void initState() {
-    super.initState();
-    _startSignInPageIfNotSignedIn();
-  }
-
-  void _startSignInPageIfNotSignedIn() async {
-    if(await FirebaseAuth.instance.currentUser() == null){
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => SignInPage()));
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:image_downloader/image_downloader.dart';
 import '../core/data_tool.dart' as dataTool;
 
+import '../main.dart';
 import 'main_page.dart';
 
 class SignInPage extends StatefulWidget {
@@ -70,7 +70,6 @@ class _SignInPageState extends State<SignInPage> {
     });
 
     final googleSignInAccount = await _googleSignIn.signIn();
-    ;
 
     var avatarURL;
     var name;
@@ -123,6 +122,6 @@ class _SignInPageState extends State<SignInPage> {
 
   void _showMainPage() {
     Navigator.of(context)
-        .pushReplacement(MaterialPageRoute(builder: (context) => MainPage()));
+        .pushReplacement(MaterialPageRoute(builder: (context) => StartPage()));
   }
 }

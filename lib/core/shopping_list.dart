@@ -1,12 +1,12 @@
 class ShoppingList {
 
   List<String> articlesIDs, userIDs;
-  String title, adminID;
+  String title, adminID, id;
   bool done;
 
-  ShoppingList({this.articlesIDs, this.title, this.userIDs, this.done, this.adminID});
+  ShoppingList({this.articlesIDs, this.title, this.userIDs, this.done, this.adminID, this.id});
 
-  factory ShoppingList.fromMap(Map<dynamic, dynamic> map) {
+  factory ShoppingList.fromMap(Map<dynamic, dynamic> map, String id) {
     if (map == null) return ShoppingList();
 
     return ShoppingList(
@@ -14,7 +14,18 @@ class ShoppingList {
       userIDs: List<String>.from(map["userIDs"]),
       title: map["title"] ?? "unknown",
       done: map["done"] ?? false,
-      adminID: map["adminID"] ?? "unknown"
+      adminID: map["adminID"] ?? "unknown",
+      id: id
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "articles":articlesIDs,
+      "userIDs":userIDs,
+      "title":title,
+      "done":done,
+      "adminID":adminID,
+    };
   }
 }
