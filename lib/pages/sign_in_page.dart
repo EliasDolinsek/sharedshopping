@@ -53,7 +53,7 @@ class _SignInPageState extends State<SignInPage> {
             ),
             Align(
               alignment: Alignment.bottomCenter,
-              child: MaterialButton(
+              child: OutlineButton(
                 child: Text("SIGN IN WITH GOOGLE"),
                 onPressed: () => _signInWithGoogle(),
               ),

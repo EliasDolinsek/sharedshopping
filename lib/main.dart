@@ -24,6 +24,7 @@ class MyApp extends StatelessWidget {
                 .where("userIDs", arrayContains: firebaseUserID),
             userDataReference: Firestore.instance.collection("users").document(firebaseUserID),
             firebaseUserID: user.uid,
+            userEmail: user.email,
           );
         } else if (user == null) {
           return _buildMaterialApp(SignInPage());

@@ -216,15 +216,21 @@ class _UsernameSettingsState extends State<UsernameSettings> {
           var user = User.fromMap(snapshot.data.data, snapshot.data.documentID);
           _username = user.name;
 
-          return RaisedTextField(
-            hintText: "Username",
-            text: _username,
-            maxLength: 20,
-            onChange: (value) => _username = value,
-            suffixIcon: IconButton(
-              icon: Icon(Icons.check),
-              onPressed: () => _setUsername(context),
-            ),
+          return Column(
+            children: <Widget>[
+              RaisedTextField(
+                hintText: "Username",
+                text: _username,
+                maxLength: 20,
+                onChange: (value) => _username = value,
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.check),
+                  onPressed: () => _setUsername(context),
+                ),
+              ),
+              SizedBox(height: 16.0),
+              Text(DataProvider.of(context).userEmail, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 0.1),)
+            ],
           );
         } else {
           return Text("LOADING...");
