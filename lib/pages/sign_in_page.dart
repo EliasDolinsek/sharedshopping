@@ -122,6 +122,6 @@ class _SignInPageState extends State<SignInPage> {
 
   void _showMainPage() {
     Navigator.of(context)
-        .pushReplacement(MaterialPageRoute(builder: (context) => StartPage()));
+        .pushReplacement(MaterialPageRoute(builder: (context) => MyApp()));
   }
 }

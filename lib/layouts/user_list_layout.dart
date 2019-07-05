@@ -29,7 +29,7 @@ class UsersList extends StatelessWidget {
           Firestore.instance.collection("users").document(userID).snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasError && snapshot.hasData) {
-          var user = User.fromMap(snapshot.data.data);
+          var user = User.fromMap(snapshot.data.data, snapshot.data.documentID);
 
           return CachedNetworkImage(
               imageUrl: user.avatarURL,

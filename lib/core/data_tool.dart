@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sharedshopping/core/dataProvider.dart';
 import 'package:sharedshopping/core/shopping_list.dart';
+import 'package:sharedshopping/core/user.dart';
 import 'article.dart';
 
 void pickAvatar(DataProvider dataProvider, Function onUploading,
@@ -88,6 +89,35 @@ Future<void> deleteShoppingList(ShoppingList shoppingList){
 }
 
 
-Future<void> createShoppingList(ShoppingList shoppingList){
+Future<DocumentReference> createShoppingList(ShoppingList shoppingList){
   return Firestore.instance.collection("shoppingLists").add(shoppingList.toMap());
+}
+
+Future<void> removeUserFromShoppingList(ShoppingList shoppingList, User user){
+  shoppingList.userIDs.remove(user.id);
+  return updateShoppingList(shoppingList);
+}
+
+Future<void> transferAdminRightsToUser(User user, ShoppingList shoppingList){
+  shoppingList.adminID = user.id;
+  return updateShoppingList(shoppingList);
+}
+
+Future<void> addUserToShoppingList(User user, ShoppingList shoppingList){
+  if(!shoppingList.userIDs.contains(user.id)){
+    shoppingList.userIDs.add(user.id);
+    return updateShoppingList(shoppingList);
+  } else {
+    return Future.error("User is already added to this shoppping list");
+  }
+}
+
+Future<void> addUserToShoppingListByEmail(String email, ShoppingList shoppingList) async {
+  Query query = Firestore.instance.collection("users").where("email", isEqualTo: email);
+
+  final document = (await query.getDocuments()).documents.first;
+  if(!document.exists) return Future.error("User doesn't exist");
+
+  final user = User.fromMap(document.data, document.documentID);
+  return addUserToShoppingList(user, shoppingList);
 }

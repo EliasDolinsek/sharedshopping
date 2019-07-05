@@ -85,7 +85,7 @@ class ProfileSettings extends StatelessWidget {
           stream: dataProvider.userDataStream,
           builder: (context, snapshot) {
             if (snapshot.hasData && !snapshot.hasError) {
-              final user = User.fromMap(snapshot.data.data);
+              final user = User.fromMap(snapshot.data.data, snapshot.data.documentID);
               return AvatarSettings(dataProvider.firebaseUserID, user.avatarURL);
             } else {
               return AvatarPlaceholder("LOADING...");
@@ -213,7 +213,7 @@ class _UsernameSettingsState extends State<UsernameSettings> {
       stream: DataProvider.of(context).userDataStream,
       builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
         if (snapshot.hasData && !snapshot.hasError) {
-          var user = User.fromMap(snapshot.data.data);
+          var user = User.fromMap(snapshot.data.data, snapshot.data.documentID);
           _username = user.name;
 
           return RaisedTextField(

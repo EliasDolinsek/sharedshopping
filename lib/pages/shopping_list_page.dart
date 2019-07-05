@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:sharedshopping/core/article.dart';
 import 'package:sharedshopping/core/shopping_list.dart';
+import 'package:sharedshopping/pages/users_list_page.dart';
 import '../core/data_tool.dart' as dataTool;
 
 class ShoppingListPage extends StatefulWidget {
@@ -52,33 +53,52 @@ class _ShoppingListPageState extends State<ShoppingListPage> {
         title: Text(_shoppingList.title, style: TextStyle(color: Colors.black)),
         iconTheme: IconThemeData(color: Colors.black),
         backgroundColor: Colors.white,
-        actions: <Widget>[
-          _buildDoneIconButton(),
-          IconButton(
-            icon: Icon(
-              Icons.delete,
-              color: Colors.redAccent,
-            ),
-            onPressed: () {
-              showDialog(
-                  context: context,
-                  builder: (context) => _buildDeleteShoppingListDialog());
-            },
-          ),
-          IconButton(icon: Icon(Icons.person), onPressed: () {})
+        actions: _buildActions(),
+      ),
+      body: ListView(
+        children: <Widget>[
+          _buildTitleSetting(),
+          SizedBox(height: 16.0),
+          ShoppingListArticlesList(_shoppingList),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: <Widget>[
-            _buildTitleSetting(),
-            SizedBox(height: 16.0),
-            ShoppingListArticlesList(_shoppingList),
-          ],
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FloatingActionButton.extended(
+        label: FlatButton.icon(
+          onPressed: () => dataTool.addArticle(Article(), _shoppingList),
+          icon: Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
+          label: Text(
+            "ADD ARTICLE",
+            style: TextStyle(color: Colors.white),
+          ),
         ),
       ),
     );
+  }
+
+  List<Widget> _buildActions() {
+    return [
+      _buildDoneIconButton(),
+      IconButton(
+        icon: Icon(
+          Icons.delete,
+          color: Colors.redAccent,
+        ),
+        onPressed: () {
+          showDialog(
+              context: context,
+              builder: (context) => _buildDeleteShoppingListDialog());
+        },
+      ),
+      IconButton(
+        icon: Icon(Icons.person),
+        onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => UsersListPage(_shoppingList.id)),),
+      )
+    ];
   }
 
   Widget _buildDeleteShoppingListDialog() {
@@ -101,16 +121,16 @@ class _ShoppingListPageState extends State<ShoppingListPage> {
   }
 
   Widget _buildTitleSetting() {
-    return TextField(
-      controller: _textEditingController,
-      decoration: InputDecoration(
-          border: OutlineInputBorder(),
-          suffixIcon: IconButton(
-              icon: Icon(Icons.check), onPressed: () => _updateTitle(_title)),
-          labelText: "Title"),
-      onChanged: (value) {
-        _title = value;
-      },
+    return Padding(
+      padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0),
+      child: TextField(
+        controller: _textEditingController,
+        decoration:
+            InputDecoration(border: OutlineInputBorder(), labelText: "Title"),
+        onChanged: (value) {
+          _updateTitle(value);
+        },
+      ),
     );
   }
 
@@ -157,48 +177,16 @@ class ShoppingListArticlesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: ListView.builder(
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: EdgeInsets.symmetric(horizontal: 2, vertical: 4),
-            child: _buildWidgetForIndex(index),
-          );
-        },
-        itemCount: shoppingList.articlesIDs.length + 1,
-      ),
-    );
-  }
-  
-  Widget _buildWidgetForIndex(int index){
-    if (index == shoppingList.articlesIDs.length) {
-      return _buildAddArticleCard();
-    } else {
-      return Padding(
-        padding: const EdgeInsets.all(1.0),
-        child: _buildArticle(shoppingList.articlesIDs.elementAt(index)),
-      );
-    }
-  }
-  
-  Widget _buildAddArticleCard(){
-    return Material(
-      elevation: 3,
-      borderRadius: BorderRadius.circular(15),
-      child: FlatButton.icon(
-        onPressed: () {
-          dataTool.addArticle(Article(), shoppingList);
-        },
-        icon: Icon(Icons.add),
-        label: Text("ADD ARTICLE"),
-      ),
+    return Column(
+      children: shoppingList.articlesIDs
+          .map((articleID) => _buildArticleCard(articleID))
+          .toList(),
     );
   }
 
-  Widget _buildArticle(String articleID) {
+  Widget _buildArticleCard(String articleID) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
+      padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
       child: Material(
         elevation: 3,
         borderRadius: BorderRadius.circular(15),
@@ -209,31 +197,12 @@ class ShoppingListArticlesList extends StatelessWidget {
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.hasData && !snapshot.hasError) {
-              final article =
-                  Article.fromMap(snapshot.data.data, snapshot.data.documentID);
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: <Widget>[
-                    _buildArticleTitleActionControls(article),
-                    _buildArticleNote(article),
-                  ],
-                ),
-              );
+              return _buildArticleCardContent(Article.fromMap(
+                  snapshot.data.data, snapshot.data.documentID));
             } else if (!snapshot.hasError) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Center(
-                  child: Text(
-                    "COULD NOT LOAD ARTICLE",
-                  ),
-                ),
-              );
+              return _buildArticleError();
             } else {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Center(child: CircularProgressIndicator()),
-              );
+              return _buildArticleLoading();
             }
           },
         ),
@@ -241,7 +210,37 @@ class ShoppingListArticlesList extends StatelessWidget {
     );
   }
 
-  Widget _buildArticleTitleActionControls(Article article) {
+  Widget _buildArticleCardContent(Article article) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: <Widget>[
+          _buildArticleTitleAndActions(article),
+          _buildArticleNote(article),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildArticleError() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Center(
+        child: Text(
+          "COULD NOT LOAD ARTICLE",
+        ),
+      ),
+    );
+  }
+
+  Widget _buildArticleLoading() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      child: Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  Widget _buildArticleTitleAndActions(Article article) {
     return Row(
       children: <Widget>[
         IconButton(

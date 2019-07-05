@@ -11,19 +11,6 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'SharedShopping',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: StartPage(),
-    );
-  }
-}
-
-class StartPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
     return FutureBuilder(
       future: FirebaseAuth.instance.currentUser(),
       builder: (context, snapshot) {
@@ -31,23 +18,40 @@ class StartPage extends StatelessWidget {
         if (snapshot.hasData && !snapshot.hasError && user != null) {
           final firebaseUserID = user.uid;
           return DataProvider(
-            child: MainPage(),
+            child: _buildMaterialApp(MainPage()),
             shoppingListsQuery: Firestore.instance
                 .collection("shoppingLists")
                 .where("userIDs", arrayContains: firebaseUserID),
             userDataReference: Firestore.instance.collection("users").document(firebaseUserID),
-            firebaseUserID: firebaseUserID,
+            firebaseUserID: user.uid,
           );
         } else if (user == null) {
-          return SignInPage();
+          return _buildMaterialApp(SignInPage());
         } else {
-          return Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
+          return _buildMaterialApp(LoadingPage());
         }
       },
+    );
+  }
+
+  Widget _buildMaterialApp(Widget child){
+    return MaterialApp(
+      title: "SharedShopping",
+      theme: ThemeData(
+        primarySwatch: Colors.blue
+      ),
+      home: child,
+    );
+  }
+}
+
+class LoadingPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
     );
   }
 }

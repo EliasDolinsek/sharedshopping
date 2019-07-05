@@ -5,7 +5,6 @@ import 'package:sharedshopping/core/dataProvider.dart';
 import 'package:sharedshopping/core/shopping_list.dart';
 import 'package:sharedshopping/layouts/user_list_layout.dart';
 import 'package:sharedshopping/pages/shopping_list_page.dart';
-import 'package:sharedshopping/widgets/raised_textfield.dart';
 import '../core/data_tool.dart' as dataTool;
 
 class ShoppingListsOverview extends StatefulWidget {
@@ -16,96 +15,63 @@ class ShoppingListsOverview extends StatefulWidget {
 }
 
 class _ShoppingListsOverviewState extends State<ShoppingListsOverview> {
-
-  String _search = "";
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: <Widget>[
-            RaisedTextField(
-              onChange: (value) => setState(() => _search = value),
-              hintText: "Search",
-            ),
-            SizedBox(
-              height: 16.0,
-            ),
-            StreamBuilder<QuerySnapshot>(
-              stream: DataProvider.of(context).shoppingListsStream,
-              builder: (context, snapshot) {
-                if (snapshot.hasError || !snapshot.hasData) {
-                  return _buildLoadingIndicator();
-                } else {
-                  return _buildShoppingListsList(snapshot.data);
-                }
-              },
-            )
-          ],
-        ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: DataProvider.of(context).shoppingListsStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError || !snapshot.hasData) {
+            return _buildLoadingIndicator();
+          } else {
+            return _buildShoppingListsList(snapshot.data);
+          }
+        },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton.extended(
-        label: FlatButton.icon(
-          onPressed: () {
-            final firebaseUserID = DataProvider.of(context).firebaseUserID;
-            dataTool.createShoppingList(
-                ShoppingList(adminID: firebaseUserID, userIDs: [firebaseUserID], title: "New Shopping List"));
-          },
-          icon: Icon(Icons.add),
-          label: Text("CREATE"),
-        ),
-      ),
+      floatingActionButton: _buildFloatingActionButton(),
     );
   }
 
   Widget _buildLoadingIndicator() {
-    return Expanded(
-      child: Center(
-        child: CircularProgressIndicator(),
-      ),
+    return Center(
+      child: CircularProgressIndicator(),
     );
   }
 
   Widget _buildShoppingListsList(QuerySnapshot snapshot) {
+    EdgeInsets getPaddingForIndex(int index) {
+      if (index == snapshot.documents.length - 1)
+        return EdgeInsets.symmetric(horizontal: 8, vertical: 8);
+      return EdgeInsets.only(left: 8.0, right: 8.0, top: 8.0);
+    }
+
     if (snapshot.documents.length == 0) {
-      return Expanded(
-        child: Center(
-          child: Text(
-            "No shopping lists found",
-            style: TextStyle(fontSize: 16, letterSpacing: 0.15),
-          ),
+      return Center(
+        child: Text(
+          "No shopping lists found",
+          style: TextStyle(fontSize: 16, letterSpacing: 0.15),
         ),
       );
     } else {
-      return Expanded(
-        child: ListView.separated(
-          shrinkWrap: true,
-          itemCount: snapshot.documents.length,
-          itemBuilder: (context, index){
-            final document = snapshot.documents.elementAt(index);
-            return Padding(
-              padding: EdgeInsets.symmetric(horizontal: 2, vertical: 8),
-              child: _buildShoppingListCard(
-                  ShoppingList.fromMap(document.data, document.documentID)),
-            );
-          },
-          separatorBuilder: (context, index) => SizedBox(
-            height: 8.0,
-          ),
-        ),
+      return ListView.builder(
+        itemBuilder: (context, index) {
+          final document = snapshot.documents.elementAt(index);
+          return Padding(
+            padding: getPaddingForIndex(index),
+            child: _buildShoppingListCard(
+              ShoppingList.fromMap(document.data, document.documentID),
+            ),
+          );
+        },
+        itemCount: snapshot.documents.length,
       );
     }
   }
 
   Widget _buildShoppingListCard(ShoppingList shoppingList) {
     return InkWell(
-      onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => ShoppingListPage(shoppingList.id)));
-      },
+      onTap: () => _showShoppingListPage(shoppingList.id, context),
       child: Material(
         elevation: 3,
         borderRadius: BorderRadius.circular(15.0),
@@ -176,4 +142,34 @@ class _ShoppingListsOverviewState extends State<ShoppingListsOverview> {
       },
     );
   }
+
+  Widget _buildFloatingActionButton() {
+    return FloatingActionButton.extended(
+      onPressed: null,
+      label: FlatButton.icon(
+        onPressed: () {
+          final firebaseUserID = DataProvider.of(context).firebaseUserID;
+          dataTool
+              .createShoppingList(ShoppingList(
+                  adminID: firebaseUserID,
+                  userIDs: [firebaseUserID],
+                  title: "New Shopping List"))
+              .then((document) => _showShoppingListPage(document.documentID, context));
+        },
+        icon: Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
+        label: Text(
+          "CREATE",
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+    );
+  }
+}
+
+void _showShoppingListPage(String shoppingListID, BuildContext context) {
+  Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => ShoppingListPage(shoppingListID)));
 }
