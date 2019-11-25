@@ -1,6 +1,6 @@
 # sharedshopping
 
-Shopping list app with ability to share your list with others and real time synch.
+Shopping list app with the ability to share your list with others in real-time.
 
 ## Getting Started
 
