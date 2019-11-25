@@ -1,6 +1,10 @@
 # sharedshopping
 
 Shopping list app with the ability to share your list with others in real-time.
+![Sign In](https://i.imgur.com/5P75CTm.png)
+![Overview](https://i.imgur.com/2RFDhq1.png)
+![Profile](https://i.imgur.com/36JBIcM.png)
+![Users of shopping list](https://i.imgur.com/mPz0Mwe.png)
 
 ## Getting Started
 
